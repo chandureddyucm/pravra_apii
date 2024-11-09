@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("pravra_api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9d27dd27b0af4ccd32ea8588290a84bf89261e35")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ba400d239ec7cd04ebe28a0c9224f3bd12e62d31")]
 [assembly: System.Reflection.AssemblyProductAttribute("pravra_api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("pravra_api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
