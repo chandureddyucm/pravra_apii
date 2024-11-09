@@ -1,0 +1,6 @@
+@pravra_api_HostAddress = http://localhost:5294
+
+GET {{pravra_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
