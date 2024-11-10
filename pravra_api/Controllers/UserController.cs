@@ -49,12 +49,12 @@ namespace pravra_api.Controllers
         }
 
         // Update an existing user
-        // [HttpPut("updateuser")]
-        // public async Task<IActionResult> UpdateUser([FromBody] User user)
-        // {
-        //     var response = await _userService.UpdateUser(user);
-        //     return response.ToActionResult();
-        // }
+        [HttpPost("updateuser")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateRequest request)
+        {
+            var response = await _userService.UpdateUser(request.UserId, request.FirstName, request.LastName, request.Mobile);
+            return response.ToActionResult();
+        }
 
         // Delete a user
         [HttpDelete("deleteuser")]

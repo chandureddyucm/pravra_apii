@@ -108,12 +108,14 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<User>> UpdateUser(User user)
+        public async Task<ServiceResponse<User>> UpdateUser(Guid userId, string firstName, string lastName, string mobile)
         {
             var response = new ServiceResponse<User>();
             try
             {
-                var updateResult = await _users.ReplaceOneAsync(u => u.UserId == user.UserId, user);
+                var update = Builders<User>.Update.Set(u => u.FirstName, firstName).Set(u => u.LastName, lastName).Set(u => u.Mobile, mobile);
+                var updateResult = await _users.UpdateOneAsync(u => u.UserId == userId, update);
+                //var updateResult = await _users.ReplaceOneAsync(u => u.UserId == user.UserId, user);
                 if (updateResult.ModifiedCount > 0)
                 {
                     response.Message = "Updated user details successfully";
@@ -138,8 +140,9 @@ namespace pravra_api.Services
             var response = new ServiceResponse<bool>();
             try
             {
-                var deleteResult = await _users.DeleteOneAsync(u => u.UserId == userId);
-                if (deleteResult.DeletedCount > 0)
+                var delete = Builders<User>.Update.Set(u => u.IsActive, false);
+                var deleteResult = await _users.UpdateOneAsync(u => u.UserId == userId, delete);
+                if (deleteResult.ModifiedCount > 0)
                 {
                     response.Message = "User deleted successfully";
                     response.Success = true;
