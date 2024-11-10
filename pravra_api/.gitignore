@@ -41,5 +41,5 @@ project.fragment.lock.json
 *.ldf
 
 # Ignore secrets and configuration files
-appsettings.*.json
-appsettings.Development.json
+# appsettings.*.json
+# appsettings.Development.json

@@ -30,6 +30,8 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     // In production, use a global error handler that redirects to a custom error page
     app.UseExceptionHandler("/Home/Error"); // You can set this to a controller route or handle error logic
     app.UseHsts();
