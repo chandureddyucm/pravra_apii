@@ -25,6 +25,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    // In development, show detailed exception pages
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    // In production, use a global error handler that redirects to a custom error page
+    app.UseExceptionHandler("/Home/Error"); // You can set this to a controller route or handle error logic
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
