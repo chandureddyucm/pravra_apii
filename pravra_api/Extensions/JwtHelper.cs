@@ -14,9 +14,9 @@ namespace pravra_api.Extensions
 
         public JwtHelper(IConfiguration _configuration)
         {
-            _secretKey = _configuration["Jwt:SecretKey"];
-            _issuer = _configuration["Jwt:Issuer"];
-            _audience = _configuration["Jwt:Audience"];
+            _secretKey = _configuration["Jwt:SecretKey"] ?? string.Empty;
+            _issuer = _configuration["Jwt:Issuer"] ?? string.Empty;
+            _audience = _configuration["Jwt:Audience"] ?? string.Empty;
         }
 
         public string GenerateToken(User user)
