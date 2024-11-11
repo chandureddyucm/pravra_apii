@@ -5,5 +5,6 @@ namespace pravra_api.Models
         public T? Data { get; set; }
         public string? Message { get; set; }
         public bool Success { get; set; }
+        public string? BearerToken { get; set; }
     }
 }

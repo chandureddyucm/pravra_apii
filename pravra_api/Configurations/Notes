@@ -1,0 +1,4 @@
+dotnet add package MongoDB.Driver
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+
+JWT Secret Key - Convert.ToBase64String(Guid.NewGuid().ToByteArray());

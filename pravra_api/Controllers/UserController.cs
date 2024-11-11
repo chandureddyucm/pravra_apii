@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pravra_api.Extensions;
 using pravra_api.Interfaces;
@@ -5,17 +6,25 @@ using pravra_api.Models;
 
 namespace pravra_api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/user")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IHttpContextAccessor? _httpContextAccessor;
 
-        public UserController(IUserService userService)
+        private string _userId;
+        public UserController(IUserService userService, IHttpContextAccessor httpContextAccessor)
         {
             _userService = userService;
+            _httpContextAccessor = httpContextAccessor;
+
+            _userId = _httpContextAccessor?.HttpContext?.User.FindFirst("UserId")?.Value ?? "User";
+
         }
 
+        [AllowAnonymous]
         [HttpPost("createuser")]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
@@ -26,17 +35,18 @@ namespace pravra_api.Controllers
 
         // Get a single user by UUID
         [HttpGet("getuserbyuserid")]
-        public async Task<IActionResult> GetUserByUserId(Guid userId)
+        public async Task<IActionResult> GetUserByUserId()
         {
-            var response = await _userService.GetUserByUserId(userId);
+            var response = await _userService.GetUserByUserId(this._userId);
             return response.ToActionResult();
         }
 
+        [AllowAnonymous]
         // Get a single user
-        [HttpGet("getuser")]
-        public async Task<IActionResult> GetUser(string email, string password)
+        [HttpGet("login")]
+        public async Task<IActionResult> Login(string email, string password)
         {
-            var response = await _userService.GetUser(email, password);
+            var response = await _userService.Login(email, password);
             return response.ToActionResult();
         }
 
@@ -52,22 +62,22 @@ namespace pravra_api.Controllers
         [HttpPost("updateuser")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateRequest request)
         {
-            var response = await _userService.UpdateUser(request.UserId, request.FirstName, request.LastName, request.Mobile);
+            var response = await _userService.UpdateUser(this._userId, request.FirstName, request.LastName, request.Mobile);
             return response.ToActionResult();
         }
 
         // Delete a user
         [HttpDelete("deleteuser")]
-        public async Task<IActionResult> DeleteUser(Guid userId)
+        public async Task<IActionResult> DeleteUser()
         {
-            var response = await _userService.DeleteUser(userId);
+            var response = await _userService.DeleteUser(this._userId);
             return response.ToActionResult();
         }
 
         [HttpPut("toggleuserstatus")]
-        public async Task<IActionResult> ToggleUserStatus(Guid userId, bool status)
+        public async Task<IActionResult> ToggleUserStatus(bool status)
         {
-            var response = await _userService.ToggleUserStatus(userId, status);
+            var response = await _userService.ToggleUserStatus(this._userId, status);
             return response.ToActionResult();
         }
     }

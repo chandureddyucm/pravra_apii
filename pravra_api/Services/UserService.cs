@@ -5,17 +5,23 @@ using pravra_api.Models;
 using Microsoft.Extensions.Options;
 using pravra_api.Configurations;
 using Microsoft.AspNetCore.Http.HttpResults;
+using pravra_api.Extensions;
 
 namespace pravra_api.Services
 {
     public class UserService : IUserService
     {
         private readonly IMongoCollection<User> _users;
+        private readonly JwtHelper _jwtHelper;
+        private readonly IConfiguration _configuration;
 
-        public UserService(IMongoClient mongoClient, IOptions<MongoDbSettings> settings)
+        public UserService(IMongoClient mongoClient, IOptions<MongoDbSettings> settings, IConfiguration configuration)
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _users = database.GetCollection<User>("user");
+
+            _configuration = configuration;
+            _jwtHelper = new JwtHelper(_configuration);
         }
 
         public async Task<ServiceResponse<User>> CreateUser(User user)
@@ -48,12 +54,12 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<User>> GetUserByUserId(Guid userId)
+        public async Task<ServiceResponse<User>> GetUserByUserId(string userId)
         {
             var response = new ServiceResponse<User>();
             try
             {
-                response.Data = await _users.Find(u => u.UserId == userId).FirstOrDefaultAsync();
+                response.Data = await _users.Find(u => u.UserId.ToString() == userId).FirstOrDefaultAsync();
                 if (response.Data == null)
                 {
                     response.Message = $"User not found with userId:{userId}";
@@ -70,7 +76,7 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<User>> GetUser(string email, string password)
+        public async Task<ServiceResponse<User>> Login(string email, string password)
         {
             var response = new ServiceResponse<User>();
             try
@@ -82,7 +88,11 @@ namespace pravra_api.Services
                     response.Success = false;
                 }
                 else
+                {
+                    var token = _jwtHelper.GenerateToken(response.Data);
+                    response.BearerToken = token;
                     response.Success = true;
+                }
             }
             catch (Exception ex)
             {
@@ -108,13 +118,13 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<User>> UpdateUser(Guid userId, string firstName, string lastName, string mobile)
+        public async Task<ServiceResponse<User>> UpdateUser(string userId, string firstName, string lastName, string mobile)
         {
             var response = new ServiceResponse<User>();
             try
             {
                 var update = Builders<User>.Update.Set(u => u.FirstName, firstName).Set(u => u.LastName, lastName).Set(u => u.Mobile, mobile);
-                var updateResult = await _users.UpdateOneAsync(u => u.UserId == userId, update);
+                var updateResult = await _users.UpdateOneAsync(u => u.UserId.ToString() == userId, update);
                 //var updateResult = await _users.ReplaceOneAsync(u => u.UserId == user.UserId, user);
                 if (updateResult.ModifiedCount > 0)
                 {
@@ -135,13 +145,13 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<bool>> DeleteUser(Guid userId)
+        public async Task<ServiceResponse<bool>> DeleteUser(string userId)
         {
             var response = new ServiceResponse<bool>();
             try
             {
                 var delete = Builders<User>.Update.Set(u => u.IsActive, false);
-                var deleteResult = await _users.UpdateOneAsync(u => u.UserId == userId, delete);
+                var deleteResult = await _users.UpdateOneAsync(u => u.UserId.ToString() == userId, delete);
                 if (deleteResult.ModifiedCount > 0)
                 {
                     response.Message = "User deleted successfully";
@@ -161,7 +171,7 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<bool>> ToggleUserStatus(Guid userId, bool status)
+        public async Task<ServiceResponse<bool>> ToggleUserStatus(string userId, bool status)
         {
             var response = new ServiceResponse<bool>();
             try
@@ -170,7 +180,7 @@ namespace pravra_api.Services
                 var update = Builders<User>.Update.Set(u => u.IsActive, status);
 
                 // Update only the IsActive field for the user with the UserId
-                var updateResult = await _users.UpdateOneAsync(u => u.UserId == userId, update);
+                var updateResult = await _users.UpdateOneAsync(u => u.UserId.ToString() == userId, update);
 
                 if (updateResult.ModifiedCount > 0)
                 {
