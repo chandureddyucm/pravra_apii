@@ -76,9 +76,9 @@ namespace pravra_api.Services
             return response;
         }
 
-        public async Task<ServiceResponse<User>> Login(string email, string password)
+        public async Task<ServiceResponseLogin<User>> Login(string email, string password)
         {
-            var response = new ServiceResponse<User>();
+            var response = new ServiceResponseLogin<User>();
             try
             {
                 response.Data = await _users.Find(u => u.Email == email && u.Password == password).FirstOrDefaultAsync();

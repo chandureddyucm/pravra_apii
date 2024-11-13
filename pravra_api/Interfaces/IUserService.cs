@@ -8,7 +8,7 @@ namespace pravra_api.Interfaces
     {
         Task<ServiceResponse<User>> CreateUser(User user);
         Task<ServiceResponse<User>> GetUserByUserId(string userId);
-        Task<ServiceResponse<User>> Login(string email, string password);
+        Task<ServiceResponseLogin<User>> Login(string email, string password);
         Task<ServiceResponse<IEnumerable<User>>> GetAllUsers();
         Task<ServiceResponse<User>> UpdateUser(string userId, string firstName, string lastName, string mobile);
         Task<ServiceResponse<bool>> DeleteUser(string userId);

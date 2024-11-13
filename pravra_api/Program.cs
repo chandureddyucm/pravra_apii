@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 
+#region Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     // Define the security scheme for bearer token
@@ -42,10 +43,25 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+#endregion
+
+#region cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("https://green-forest-0215fcc1e.5.azurestaticapps.net")  // Replace with your Angular app URL
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+              //http://localhost:4200 : local
+              //https://green-forest-0215fcc1e.5.azurestaticapps.net : Azure
+    });
+});
+#endregion
 
 builder.Services.AddControllers();
 
-// JWT Authentication configuration
+#region JWT Authentication configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -60,19 +76,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? string.Empty))
         };
-    });
-
+    }
+);
 builder.Services.AddAuthorization();
+#endregion
 
-// MongoDB configuration
+#region MongoDB configuration
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<IMongoClient, MongoClient>(
     s => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));
 builder.Services.AddScoped<IUserService, UserService>();
+#endregion
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -96,6 +113,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("AllowAngularApp");
 
 app.MapControllers();
 
