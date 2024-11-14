@@ -45,19 +45,19 @@ builder.Services.AddSwaggerGen(options =>
 });
 #endregion
 
-// #region cors
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowAngularApp", policy =>
-//     {
-//         policy.WithOrigins("https://green-forest-0215fcc1e.5.azurestaticapps.net")  // Replace with your Angular app URL
-//               .AllowAnyMethod()
-//               .AllowAnyHeader();
-//               //http://localhost:4200 : local
-//               //https://green-forest-0215fcc1e.5.azurestaticapps.net : Azure
-//     });
-// });
-// #endregion
+#region cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")  // Replace with your Angular app URL
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+        //http://localhost:4200 : local
+        //https://green-forest-0215fcc1e.5.azurestaticapps.net : Azure
+    });
+});
+#endregion
 
 builder.Services.AddControllers();
 
@@ -113,7 +113,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-//app.UseCors("AllowAngularApp");
+app.UseCors("AllowAngularApp");
 
 app.MapControllers();
 

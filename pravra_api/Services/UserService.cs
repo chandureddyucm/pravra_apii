@@ -33,25 +33,16 @@ namespace pravra_api.Services
                 var existingUser = await _users.Find(u => u.Mobile == user.Mobile || u.Email == user.Email).FirstOrDefaultAsync();
 
                 if (existingUser != null)
-                {
-                    response.Message = "Mobile or Email is already in use.";
-                    response.Success = false;
-                    return response;
-                }
+                    return response.SetResponse(false, "Mobile or Email is already in use.");
 
                 // If not, insert the new user into the database
                 await _users.InsertOneAsync(user);
-
-                response.Data = user;
-                response.Success = true;
-                response.Message = "User created successfully";
+                return response.SetResponse(true, "User created successfully", user);
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
 
         public async Task<ServiceResponse<User>> GetUserByUserId(string userId)
@@ -59,21 +50,16 @@ namespace pravra_api.Services
             var response = new ServiceResponse<User>();
             try
             {
-                response.Data = await _users.Find(u => u.UserId.ToString() == userId).FirstOrDefaultAsync();
-                if (response.Data == null)
-                {
-                    response.Message = $"User not found with userId:{userId}";
-                    response.Success = false;
-                }
+                User user = await _users.Find(u => u.UserId.ToString() == userId).FirstOrDefaultAsync();
+                if (user == null)
+                    return response.SetResponse(false, $"User not found with userId:{userId}");
                 else
-                    response.Success = true;
+                    return response.SetResponse(true, user);
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
 
         public async Task<ServiceResponseLogin<User>> Login(string email, string password)
@@ -83,23 +69,17 @@ namespace pravra_api.Services
             {
                 response.Data = await _users.Find(u => u.Email == email && u.Password == password).FirstOrDefaultAsync();
                 if (response.Data == null)
-                {
-                    response.Message = $"User not found or wrong credentials";
-                    response.Success = false;
-                }
+                    return response.SetResponse(false, $"User not found or wrong credentials");
                 else
                 {
                     var token = _jwtHelper.GenerateToken(response.Data);
-                    response.BearerToken = token;
-                    response.Success = true;
+                    return response.SetResponse(true, "User Logged In Successfully", token);
                 }
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
 
         public async Task<ServiceResponse<IEnumerable<User>>> GetAllUsers()
@@ -107,15 +87,13 @@ namespace pravra_api.Services
             var response = new ServiceResponse<IEnumerable<User>>();
             try
             {
-                response.Data = await _users.Find(_ => true).ToListAsync();
-                response.Success = true;
+                List<User> users = await _users.Find(_ => true).ToListAsync();
+                return response.SetResponse(true, users);
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
 
         public async Task<ServiceResponse<User>> UpdateUser(string userId, string firstName, string lastName, string mobile)
@@ -127,22 +105,14 @@ namespace pravra_api.Services
                 var updateResult = await _users.UpdateOneAsync(u => u.UserId.ToString() == userId, update);
                 //var updateResult = await _users.ReplaceOneAsync(u => u.UserId == user.UserId, user);
                 if (updateResult.ModifiedCount > 0)
-                {
-                    response.Message = "Updated user details successfully";
-                    response.Success = true;
-                }
+                    return response.SetResponse(true, "Updated user details successfully");
                 else
-                {
-                    response.Message = "User not found or no changes made.";
-                    response.Success = false;
-                }
+                    return response.SetResponse(false, "User not found or no changes made.");
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
 
         public async Task<ServiceResponse<bool>> DeleteUser(string userId)
@@ -153,22 +123,14 @@ namespace pravra_api.Services
                 var delete = Builders<User>.Update.Set(u => u.IsActive, false);
                 var deleteResult = await _users.UpdateOneAsync(u => u.UserId.ToString() == userId, delete);
                 if (deleteResult.ModifiedCount > 0)
-                {
-                    response.Message = "User deleted successfully";
-                    response.Success = true;
-                }
+                    return response.SetResponse(true, "User deleted successfully");
                 else
-                {
-                    response.Message = "User not found";
-                    response.Success = false;
-                }
+                    return response.SetResponse(false, "User not found");
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
 
         public async Task<ServiceResponse<bool>> ToggleUserStatus(string userId, bool status)
@@ -183,22 +145,14 @@ namespace pravra_api.Services
                 var updateResult = await _users.UpdateOneAsync(u => u.UserId.ToString() == userId, update);
 
                 if (updateResult.ModifiedCount > 0)
-                {
-                    response.Message = "User status toggled successfully";
-                    response.Success = true;
-                }
+                    return response.SetResponse(true, "User status toggled successfully");
                 else
-                {
-                    response.Message = "User not found";
-                    response.Success = false;
-                }
+                    return response.SetResponse(false, "User not found");
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
-                response.Success = false;
+                return response.SetResponseWithEx(ex.Message);
             }
-            return response;
         }
     }
 }

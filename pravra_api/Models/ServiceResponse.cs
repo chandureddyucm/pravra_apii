@@ -2,12 +2,46 @@ namespace pravra_api.Models
 {
     public class ServiceResponse<T>
     {
+        public bool Status { get; set; }
         public T? Data { get; set; }
-        public string? Message { get; set; }
-        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string Error { get; set; } = string.Empty;
+
+        public ServiceResponse<T> SetResponse(bool status, string message, T? data = default)
+        {
+            Status = status;
+            Data = data;
+            Message = message;
+            return this;
+        }
+        public ServiceResponse<T> SetResponse(bool status, T? data = default)
+        {
+            Status = status;
+            Data = data;
+            return this;
+        }
+        public ServiceResponse<T> SetResponseWithEx(string error)
+        {
+            Status = false;
+            Error = error;
+            return this;
+        }
     }
 
-    public class ServiceResponseLogin<T> : ServiceResponse<T> {
-        public string? BearerToken { get; set; }
+    public class ServiceResponseLogin<T> : ServiceResponse<T>
+    {
+        public string BearerToken { get; set; } = string.Empty;
+        public ServiceResponseLogin<T> SetResponse(bool status, string message, string bearerToken = "")
+        {
+            base.SetResponse(status, message);
+            BearerToken = bearerToken;
+            return this;
+        }
+        public ServiceResponseLogin<T> SetResponseWithEx(string error, string bearerToken = "")
+        {
+            base.SetResponseWithEx(error);
+            BearerToken = bearerToken;
+            return this;
+        }
     }
 }
