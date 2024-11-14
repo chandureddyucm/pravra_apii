@@ -7,7 +7,7 @@ namespace pravra_api.Extensions
     {
         public static IActionResult ToActionResult<T>(this ServiceResponse<T> response)
         {
-            if (response.Success)
+            if (response.Status)
                 return new OkObjectResult(response); // Returns 200 OK with response data
             else
                 return new BadRequestObjectResult(response); // Returns 400 Bad Request with response data
