@@ -10,7 +10,7 @@ namespace pravra_api.Extensions
             if (response.Status)
                 return new OkObjectResult(response); // Returns 200 OK with response data
             else
-                return new BadRequestObjectResult(response); // Returns 400 Bad Request with response data
+                return new OkObjectResult(response);//BadRequestObjectResult  Returns 400 Bad Request with response data
         }
     }
 }

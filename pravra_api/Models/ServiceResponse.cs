@@ -31,10 +31,15 @@ namespace pravra_api.Models
     public class ServiceResponseLogin<T> : ServiceResponse<T>
     {
         public string BearerToken { get; set; } = string.Empty;
-        public ServiceResponseLogin<T> SetResponse(bool status, string message, string bearerToken = "")
+        public ServiceResponseLogin<T> SetResponse(bool status, string message, string? bearerToken, T? data = default)
+        {
+            base.SetResponse(status, message, data);
+            BearerToken = bearerToken ?? string.Empty;
+            return this;
+        }
+        public ServiceResponseLogin<T> SetResponse(bool status, string message)
         {
             base.SetResponse(status, message);
-            BearerToken = bearerToken;
             return this;
         }
         public ServiceResponseLogin<T> SetResponseWithEx(string error, string bearerToken = "")

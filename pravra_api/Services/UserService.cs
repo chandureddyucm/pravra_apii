@@ -72,8 +72,8 @@ namespace pravra_api.Services
                     return response.SetResponse(false, $"User not found or wrong credentials");
                 else
                 {
-                    var token = _jwtHelper.GenerateToken(response.Data);
-                    return response.SetResponse(true, "User Logged In Successfully", token);
+                    response.BearerToken = _jwtHelper.GenerateToken(response.Data);
+                    return response.SetResponse(true, "User Logged In Successfully", response.BearerToken, response.Data);
                 }
             }
             catch (Exception ex)
