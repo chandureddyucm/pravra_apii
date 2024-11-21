@@ -88,6 +88,7 @@ builder.Services.AddSingleton<IMongoClient, MongoClient>(
     s => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IContactService, ContactService>();
 
 #endregion
 
