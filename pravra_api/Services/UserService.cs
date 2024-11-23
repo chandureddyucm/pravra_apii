@@ -12,6 +12,7 @@ namespace pravra_api.Services
     public class UserService : IUserService
     {
         private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollection<Subscription> _subscription;
         private readonly JwtHelper _jwtHelper;
         private readonly IConfiguration _configuration;
 
@@ -19,6 +20,7 @@ namespace pravra_api.Services
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _users = database.GetCollection<User>("user");
+            _subscription = database.GetCollection<Subscription>("subscription");
 
             _configuration = configuration;
             _jwtHelper = new JwtHelper(_configuration);
@@ -148,6 +150,41 @@ namespace pravra_api.Services
                     return response.SetResponse(true, "User status toggled successfully");
                 else
                     return response.SetResponse(false, "User not found");
+            }
+            catch (Exception ex)
+            {
+                return response.SetResponseWithEx(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResponse<bool>> AddSubscription(Subscription subscriber)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                // Check if the Mobile or Email already exists in the database
+                var existingSubscriber = await _subscription.Find(s => s.Email == subscriber.Email).FirstOrDefaultAsync();
+
+                if (existingSubscriber != null)
+                    return response.SetResponse(false, $"Email:{subscriber.Email} is already subscribed");
+
+                // If not, insert the new user into the database
+                await _subscription.InsertOneAsync(subscriber);
+                return response.SetResponse(true, $"Subscription created successfully for email: {subscriber.Email}");
+            }
+            catch (Exception ex)
+            {
+                return response.SetResponseWithEx(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResponse<IEnumerable<Subscription>>> GetAllSubscribers()
+        {
+            var response = new ServiceResponse<IEnumerable<Subscription>>();
+            try
+            {
+                List<Subscription> subscribers = await _subscription.Find(_ => true).ToListAsync();
+                return response.SetResponse(true, subscribers);
             }
             catch (Exception ex)
             {

@@ -13,5 +13,7 @@ namespace pravra_api.Interfaces
         Task<ServiceResponse<User>> UpdateUser(string userId, string firstName, string lastName, string mobile);
         Task<ServiceResponse<bool>> DeleteUser(string userId);
         Task<ServiceResponse<bool>> ToggleUserStatus(string userId, bool status);
+        Task<ServiceResponse<bool>> AddSubscription(Subscription subscriber);
+        Task<ServiceResponse<IEnumerable<Subscription>>> GetAllSubscribers();
     }
 }

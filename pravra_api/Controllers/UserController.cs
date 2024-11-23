@@ -80,5 +80,22 @@ namespace pravra_api.Controllers
             var response = await _userService.ToggleUserStatus(this._userId, status);
             return response.ToActionResult();
         }
+
+        [AllowAnonymous]
+        [HttpPut("addSubscription")]
+        public async Task<IActionResult> AddSubscription(string email)
+        {
+            Subscription subscriber = new Subscription{SubscriptionId = Guid.NewGuid(), Email = email, IsActive = true};
+            var response = await _userService.AddSubscription(subscriber);
+            return response.ToActionResult();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("getAllSubscribers")]
+        public async Task<IActionResult> GetAllSubscribers()
+        {
+            var response = await _userService.GetAllSubscribers();
+            return response.ToActionResult();
+        }
     }
 }

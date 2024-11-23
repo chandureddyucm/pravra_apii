@@ -8,6 +8,10 @@ namespace pravra_api.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]
+        public Guid Id { get; set; }
+
+        [BsonElement("ContactId")]
+        [BsonRepresentation(BsonType.String)]
         public Guid ContactId { get; set; }
 
         [BsonElement("Tag")]

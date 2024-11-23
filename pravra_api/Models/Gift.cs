@@ -7,6 +7,10 @@ namespace pravra_api.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]
+        public Guid Id { get; set; }
+
+        [BsonElement("GiftId")]
+        [BsonRepresentation(BsonType.String)]
         public Guid GiftId { get; set; }
 
         [BsonElement("Name")]
