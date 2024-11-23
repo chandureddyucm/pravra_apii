@@ -30,6 +30,9 @@ namespace pravra_api.Models
 
         [BsonElement("Password")]
         public required string Password { get; set; }
+        
+        [BsonElement("IsAdmin")]
+        public bool IsAdmin { get; set; } = false;
 
         [BsonElement("IsActive")]
         public bool IsActive { get; set; } = true;
