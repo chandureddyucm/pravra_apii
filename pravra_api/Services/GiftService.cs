@@ -31,7 +31,8 @@ namespace pravra_api.Services
             var response = new ServiceResponse<Gift>();
             try
             {
-                if(image == null){
+                if (image == null)
+                {
                     response.SetResponse(false, "Image is required");
                 }
                 gift.GiftId = Guid.NewGuid();
@@ -42,7 +43,7 @@ namespace pravra_api.Services
                     var imageUrl = await _blobStorageHelper.UploadFileAsync(stream!, fileName);
                     gift.ImageSrc = imageUrl; // Set the Blob URL in the gift object
                 }
-                
+
                 await _giftsCollection.InsertOneAsync(gift);
                 return response.SetResponse(true, "Gift created successfully", gift);
             }
@@ -57,18 +58,22 @@ namespace pravra_api.Services
             var response = new ServiceResponse<Gift>();
             try
             {
-                if(image == null){
-                    response.SetResponse(false, "Image is required");
-                }
-
-                using (var stream = image?.OpenReadStream())
+                if (image != null)
                 {
-                    var fileName = $"{giftId}{Path.GetExtension(image?.FileName)}_{DateTime.Now:yyyyMMddHHmmss}"; // Unique file name
-                    var imageUrl = await _blobStorageHelper.UploadFileAsync(stream!, fileName);
-                    gift.ImageSrc = imageUrl; // Set the Blob URL in the gift object
+                    using (var stream = image?.OpenReadStream())
+                    {
+                        var fileName = $"{giftId}{Path.GetExtension(image?.FileName)}_{DateTime.Now:yyyyMMddHHmmss}"; // Unique file name
+                        var imageUrl = await _blobStorageHelper.UploadFileAsync(stream!, fileName);
+                        gift.ImageSrc = imageUrl; // Set the Blob URL in the gift object
+                    }
                 }
 
-                var update = Builders<Gift>.Update.Set(u => u.Name, gift.Name).Set(u => u.Description, gift.Description).Set(u => u.Category, gift.Category).Set(u => u.Subcategory, gift.Subcategory).Set(u => u.Price, gift.Price).Set(u => u.Availability, gift.Availability).Set(u => u.ImageSrc, gift.ImageSrc);
+                var update = Builders<Gift>.Update.Set(u => u.Name, gift.Name).Set(u => u.Description, gift.Description).Set(u => u.Category, gift.Category).Set(u => u.Subcategory, gift.Subcategory).Set(u => u.Price, gift.Price).Set(u => u.Availability, gift.Availability);
+                if (!string.IsNullOrEmpty(gift.ImageSrc))
+                {
+                    update = update.Set(u => u.ImageSrc, gift.ImageSrc);
+                }
+
                 var updateResult = await _giftsCollection.UpdateOneAsync(u => u.GiftId.ToString() == giftId, update);
                 if (updateResult.ModifiedCount > 0)
                     return response.SetResponse(true, "Updated Gift details successfully");
