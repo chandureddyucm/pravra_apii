@@ -38,7 +38,7 @@ namespace pravra_api.Services
 
                 using (var stream = image?.OpenReadStream())
                 {
-                    var fileName = $"{gift.GiftId}{Path.GetExtension(image?.FileName)}"; // Unique file name
+                    var fileName = $"{gift.GiftId}{Path.GetExtension(image?.FileName)}_{DateTime.Now:yyyyMMddHHmmss}"; // Unique file name
                     var imageUrl = await _blobStorageHelper.UploadFileAsync(stream!, fileName);
                     gift.ImageSrc = imageUrl; // Set the Blob URL in the gift object
                 }
@@ -52,12 +52,23 @@ namespace pravra_api.Services
             }
         }
 
-        public async Task<ServiceResponse<Gift>> UpdateGift(string giftId, Gift gift)
+        public async Task<ServiceResponse<Gift>> UpdateGift(string giftId, Gift gift, IFormFile? image)
         {
             var response = new ServiceResponse<Gift>();
             try
             {
-                var update = Builders<Gift>.Update.Set(u => u.Name, gift.Name).Set(u => u.Description, gift.Description).Set(u => u.Category, gift.Category).Set(u => u.Subcategory, gift.Subcategory).Set(u => u.Price, gift.Price).Set(u => u.Availability, gift.Availability);
+                if(image == null){
+                    response.SetResponse(false, "Image is required");
+                }
+
+                using (var stream = image?.OpenReadStream())
+                {
+                    var fileName = $"{giftId}{Path.GetExtension(image?.FileName)}_{DateTime.Now:yyyyMMddHHmmss}"; // Unique file name
+                    var imageUrl = await _blobStorageHelper.UploadFileAsync(stream!, fileName);
+                    gift.ImageSrc = imageUrl; // Set the Blob URL in the gift object
+                }
+
+                var update = Builders<Gift>.Update.Set(u => u.Name, gift.Name).Set(u => u.Description, gift.Description).Set(u => u.Category, gift.Category).Set(u => u.Subcategory, gift.Subcategory).Set(u => u.Price, gift.Price).Set(u => u.Availability, gift.Availability).Set(u => u.ImageSrc, gift.ImageSrc);
                 var updateResult = await _giftsCollection.UpdateOneAsync(u => u.GiftId.ToString() == giftId, update);
                 if (updateResult.ModifiedCount > 0)
                     return response.SetResponse(true, "Updated Gift details successfully");
