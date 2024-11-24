@@ -1,5 +1,7 @@
 dotnet add package MongoDB.Driver
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Azure.Storage.Blobs
+dotnet add package Swashbuckle.AspNetCore
 
 JWT Secret Key - Convert.ToBase64String(Guid.NewGuid().ToByteArray());
 

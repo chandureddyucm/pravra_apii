@@ -15,22 +15,34 @@ namespace pravra_api.Services
         private readonly IMongoCollection<Gift> _giftsCollection;
         private readonly JwtHelper _jwtHelper;
         private readonly IConfiguration _configuration;
+        private readonly BlobStorageHelper _blobStorageHelper;
 
-        public GiftService(IMongoClient mongoClient, IOptions<MongoDbSettings> settings, IConfiguration configuration)
+        public GiftService(IMongoClient mongoClient, IOptions<MongoDbSettings> settings, IConfiguration configuration, BlobStorageHelper blobStorageHelper)
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _giftsCollection = database.GetCollection<Gift>("gifts");
-
+            _blobStorageHelper = blobStorageHelper;
             _configuration = configuration;
             _jwtHelper = new JwtHelper(_configuration);
         }
 
-        public async Task<ServiceResponse<Gift>> AddGift(Gift gift)
+        public async Task<ServiceResponse<Gift>> AddGift(Gift gift, IFormFile? image)
         {
             var response = new ServiceResponse<Gift>();
             try
             {
+                if(image == null){
+                    response.SetResponse(false, "Image is required");
+                }
                 gift.GiftId = Guid.NewGuid();
+
+                using (var stream = image?.OpenReadStream())
+                {
+                    var fileName = $"{gift.GiftId}{Path.GetExtension(image?.FileName)}"; // Unique file name
+                    var imageUrl = await _blobStorageHelper.UploadFileAsync(stream!, fileName);
+                    gift.ImageSrc = imageUrl; // Set the Blob URL in the gift object
+                }
+                
                 await _giftsCollection.InsertOneAsync(gift);
                 return response.SetResponse(true, "Gift created successfully", gift);
             }

@@ -19,9 +19,19 @@ namespace pravra_api.Controllers
         }
 
         [HttpPost("addGift")]
-        public async Task<IActionResult> AddGift([FromBody] Gift gift)
+        public async Task<IActionResult> AddGift(IFormCollection form)
         {
-            var newGift = await _giftService.AddGift(gift);
+            var file = form.Files.GetFile("image"); 
+            Gift gift = new Gift
+            {
+                Name = form["name"].ToString(), 
+                Description = form["description"].ToString(),
+                Category = form["category"].ToString(),
+                Subcategory = form["subCategory"].ToString(),
+                Price = decimal.TryParse(form["price"], out decimal price) ? price : 0, 
+                ImageSrc = "" 
+            };
+            var newGift = await _giftService.AddGift(gift, file);
             return newGift.ToActionResult();
         }
 

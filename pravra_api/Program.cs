@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
+using pravra_api.Extensions;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,8 @@ builder.Services.AddEndpointsApiExplorer();
 #region Swagger
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SchemaFilter<FileUploadSchemaFilter>();
+
     // Define the security scheme for bearer token
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -84,13 +88,15 @@ builder.Services.AddAuthorization();
 #region MongoDB configuration
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
-builder.Services.AddSingleton<IMongoClient, MongoClient>(
-    s => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));
+builder.Services.AddSingleton<IMongoClient, MongoClient>(s => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<BlobStorageHelper>();
 
 #endregion
+
+builder.Services.AddSingleton(x => { return new BlobServiceClient(builder.Configuration["AzureBlobStorage:ConnectionString"]); });
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 var app = builder.Build();
